@@ -115,7 +115,8 @@ class Handler(SimpleHTTPRequestHandler):
         if not u.path.startswith('/api/'):
             return super().do_GET()
         # En-tête maison : une page web tierce ne peut pas l'envoyer sans pré-vol CORS, qu'on ne sert pas.
-        if self.headers.get('X-Stremio-Custom') != '1':
+        # En local, un autre nom d'hôte (rebinding DNS : piege.com -> 127.0.0.1) est refusé comme pour le relais.
+        if self.headers.get('X-Stremio-Custom') != '1' or (not PUBLIC and proxy.foreign(self.headers, self.server.server_port)):
             return self.reply(403, {'error': 'interdit'})
         q = urllib.parse.parse_qs(u.query)
         try:
