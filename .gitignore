@@ -1,0 +1,9 @@
+# Clés et données : jamais dans le dépôt
+.env
+data/
+# Interface compilée (fork stremio-web) et fichiers de travail
+stremio-web/
+tmp/
+.venv/
+__pycache__/
+graphify-out/
