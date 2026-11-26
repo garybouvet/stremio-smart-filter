@@ -33,7 +33,12 @@ VOTES = {'1 000+': '1000', '10 000+': '10000', '50 000+': '50000', '100 000+': '
 DUREES = {'Moins de 90 min': ('', '89'), '90 à 120 min': ('90', '120'), '120 à 150 min': ('120', '150'),
           'Plus de 150 min': ('151', '')}
 TRIS = {'Meilleure note': 'rating', 'Popularité': 'votes', 'Plus récents': 'year', 'Plus anciens': 'year_asc'}
+# Tris par d'autres notes : proposés seulement si la base a ces notes (MDBList, TMDB).
+TRIS_NOTES = {'Moyenne des notes': ('average', None), 'Rotten Tomatoes': ('tomatoes', 'tomatoes'),
+              'Metacritic': ('metacritic', 'metacritic'), 'Letterboxd': ('letterboxd', 'letterboxd'),
+              'Trakt': ('trakt', 'trakt'), 'Note TMDB': ('tmdb', 'tmdb')}
 PAGE = 100
+MAX_PLACES = 30  # les plateformes les plus fournies : un menu plus long est illisible à la télécommande
 
 
 def decades():
@@ -45,20 +50,25 @@ def manifest(options):
     """options : search.options(db), pour ne proposer que les langues et pays présents dans les données."""
     langs = [LANGS_FR[c] for c in options['languages'] if c in LANGS_FR]
     countries = [COUNTRIES_FR[c] for c in options['countries'] if c in COUNTRIES_FR]
+    places = options.get('places', [])[:MAX_PLACES]
+    scores = set(options.get('scores', []))
+    tris = list(TRIS) + [name for name, (_, source) in TRIS_NOTES.items() if source is None and scores or source in scores]
     genres = list(GENRES_FR)
     extra = [{'name': 'genre', 'options': genres}, {'name': 'Note', 'options': list(NOTES)},
              {'name': 'Décennie', 'options': list(decades())}, {'name': 'Genre 2', 'options': genres},
              {'name': 'Exclure', 'options': genres}, {'name': 'Votes', 'options': list(VOTES)},
-             {'name': 'Durée', 'options': list(DUREES)}, {'name': 'Tri', 'options': list(TRIS)}]
+             {'name': 'Durée', 'options': list(DUREES)}, {'name': 'Tri', 'options': tris}]
+    if places:
+        extra.append({'name': 'Plateforme', 'options': places})
     if langs:
         extra.append({'name': 'Langue', 'options': langs})
     if countries:
-        extra.append({'name': 'Pays', 'options': countries})
+        extra += [{'name': 'Pays', 'options': countries}, {'name': 'Sans le pays', 'options': countries}]
     extra.append({'name': 'skip'})
     return {
-        'id': 'local.stremio-custom.filtres', 'version': '1.0.0', 'name': 'Filtres',
-        'description': 'Films et séries filtrés par note IMDb, votes, décennie, genres, langue, pays, durée ; '
-                       'tri par note pondérée, popularité ou date.',
+        'id': 'local.stremio-custom.filtres', 'version': '1.1.0', 'name': 'Filtres',
+        'description': 'Films et séries filtrés par note IMDb, votes, décennie, genres, plateforme, langue, pays '
+                       '(ou sans un pays), durée ; tri par note pondérée, autres notes, popularité ou date.',
         'resources': ['catalog'], 'types': ['movie', 'series'], 'idPrefixes': ['tt'],
         'catalogs': [{'type': t, 'id': 'filtres', 'name': 'Filtres', 'extra': extra} for t in ('movie', 'series')],
         'behaviorHints': {'configurable': False},
@@ -68,7 +78,8 @@ def manifest(options):
 def to_query(typ, extra):
     """Extras Stremio (dict libellé -> valeur) -> paramètres du moteur. Valeur inconnue : ValueError."""
     inv = {v: k for k, v in LANGS_FR.items()}, {v: k for k, v in COUNTRIES_FR.items()}
-    q = {'type': [typ], 'limit': [str(PAGE)], 'skip': [extra.get('skip', '0')]}
+    # « known » : sans les titres confidentiels (moins de 100 votes, sur aucune plateforme), comme le panneau par défaut.
+    q = {'type': [typ], 'limit': [str(PAGE)], 'skip': [extra.get('skip', '0')], 'known': ['1']}
     pick = lambda table, key: table[extra[key]] if key in extra else None
     if 'Note' in extra:
         q['rating_min'] = [pick(NOTES, 'Note')]
@@ -79,7 +90,9 @@ def to_query(typ, extra):
     if 'Durée' in extra:
         q['runtime_min'], q['runtime_max'] = [[v] for v in DUREES[extra['Durée']]]
     if 'Tri' in extra:
-        q['sort'] = [pick(TRIS, 'Tri')]
+        q['sort'] = [TRIS[extra['Tri']] if extra['Tri'] in TRIS else TRIS_NOTES[extra['Tri']][0]]
+    if 'Plateforme' in extra:
+        q['place'] = [extra['Plateforme']]
     wanted = [GENRES_FR[extra[k]] for k in ('genre', 'Genre 2') if k in extra]
     if wanted:
         q['genres_all'] = [','.join(wanted)]
@@ -89,6 +102,8 @@ def to_query(typ, extra):
         q['language'] = [inv[0][extra['Langue']]]
     if 'Pays' in extra:
         q['country'] = [inv[1][extra['Pays']]]
+    if 'Sans le pays' in extra:
+        q['country_not'] = [inv[1][extra['Sans le pays']]]
     return q
 
 

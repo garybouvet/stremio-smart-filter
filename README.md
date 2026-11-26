@@ -4,11 +4,13 @@ De vrais filtres pour Stremio sur PC Windows : trouver un film ou une série en 
 
 Stremio Smart Filter s'ajoute à ton Stremio habituel : même compte, mêmes addons, même lecteur. Il ajoute un panneau de filtres dans Découvrir et un choix des liens par langue sur la fiche de chaque titre.
 
-![Découvrir avec le panneau de filtres](docs/captures/decouvrir.jpg)
+![Stremio Smart Filter](docs/presentation/1-couverture.jpg)
 
 > Projet personnel, gratuit, **non affilié à Stremio**. Il ne fournit aucun lien ni aucun addon de liens : il trie et filtre ce que tes propres addons proposent.
 
 ## Ce qu'il ajoute
+
+![Films : le panneau de filtres](docs/presentation/2-films.jpg)
 
 **Dans Découvrir, un bouton « Filtres » :**
 - Quatre sources : **Ce catalogue** (n'importe quel addon), **Toutes les sources** (tous les catalogues de tes addons, sans doublon), **Tout** (environ 550 000 titres IMDb, plus ceux de TMDB et de tes addons), **Pour toi** (recommandations tirées de ta bibliothèque).
@@ -19,6 +21,8 @@ Stremio Smart Filter s'ajoute à ton Stremio habituel : même compte, mêmes add
 - Tris par note, par note d'un autre site, par popularité ou par date. Les notes sont pondérées par le nombre de votes : un 10/10 sur 12 votes ne passe pas devant.
 - Recherches enregistrées : chacune devient une rangée de l'accueil.
 
+![Séries : triées par Rotten Tomatoes](docs/presentation/3-series.jpg)
+
 **Partout :**
 - Recherche par titre français ou original, sans se soucier des accents (« les evades », « plan coeur »).
 - Aperçu en français : résumé, casting, bande-annonce en VF quand elle existe, notes et plateformes.
@@ -28,7 +32,7 @@ Stremio Smart Filter s'ajoute à ton Stremio habituel : même compte, mêmes add
 - Tous tes addons réunis, sans doublon ; les liens prêts à lire d'abord.
 - Langue déduite du nom du lien, avec des règles vérifiées sur de vrais fichiers.
 
-![Choix du lien par langue](docs/captures/liens.jpg)
+![Liens : menus Audio et Sous-titres](docs/presentation/4-langues.jpg)
 
 ## Ce qu'il faut
 

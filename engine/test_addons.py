@@ -63,6 +63,15 @@ class Filtres(unittest.TestCase):
                          (['Drama,Crime'], ['Animation'], ['8'], ['1990'], ['1999']))
         self.assertEqual((q['runtime_min'], q['runtime_max'], q['sort'], q['skip']), (['120'], ['150'], ['votes'], ['100']))
 
+    def test_platform_country_out_and_other_scores(self):
+        q = addon_filtres.to_query('movie', {'Plateforme': 'Netflix', 'Sans le pays': 'Inde', 'Tri': 'Rotten Tomatoes'})
+        self.assertEqual((q['place'], q['country_not'], q['sort'], q['known']), (['Netflix'], ['IN'], ['tomatoes'], ['1']))
+        menus = {e['name']: e.get('options') for e in addon_filtres.manifest(
+            {'languages': [], 'countries': ['IN'], 'places': ['Netflix'], 'scores': ['tomatoes']})['catalogs'][0]['extra']}
+        self.assertEqual((menus['Plateforme'], menus['Sans le pays']), (['Netflix'], ['Inde']))
+        self.assertIn('Rotten Tomatoes', menus['Tri'])
+        self.assertNotIn('Letterboxd', menus['Tri'])  # pas de notes Letterboxd dans ces données
+
     def test_unknown_option_is_rejected(self):
         self.assertRaises(ValueError, addon_filtres.catalog, None, 'movie', {'Note': '11+'})
 
@@ -72,7 +81,7 @@ class Filtres(unittest.TestCase):
             self.assertEqual([c['type'] for c in m['catalogs']], ['movie', 'series'])
             self.assertNotIn('Langue', [e['name'] for e in m['catalogs'][0]['extra']])  # pas de données TMDB ici
             metas = get('/addon/secret/filtres/catalog/movie/filtres/genre=Drame&Note=8%2B.json', {})['metas']
-            self.assertEqual([x['id'] for x in metas], ['tt1', 'tt2', 'tt4'])
+            self.assertEqual([x['id'] for x in metas], ['tt1', 'tt2'])  # tt4 : 40 votes, sur aucune plateforme, masqué
             with self.assertRaises(urllib.error.HTTPError) as e:
                 get('/addon/mauvais/filtres/manifest.json', {})
             self.assertEqual(e.exception.code, 404)
