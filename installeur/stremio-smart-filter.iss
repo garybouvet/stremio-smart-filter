@@ -50,16 +50,17 @@ fr.FinishedLabel=Stremio Smart Filter est installé. Lance-le avec le raccourci 
 Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion
 
 [Icons]
-Name: "{userdesktop}\{#AppName}"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; \
-  Parameters: "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ""{app}\lancer.ps1"""; \
+; conhost --headless : aucune fenêtre de console, même un instant (Windows Terminal ne sait pas cacher PowerShell).
+Name: "{userdesktop}\{#AppName}"; Filename: "{sys}\conhost.exe"; \
+  Parameters: "--headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File ""{app}\lancer.ps1"""; \
   WorkingDir: "{app}"; IconFilename: "{code:StremioExe}"; Comment: "Stremio avec les filtres et le choix des liens par langue"
-Name: "{userprograms}\{#AppName}"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; \
-  Parameters: "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ""{app}\lancer.ps1"""; \
+Name: "{userprograms}\{#AppName}"; Filename: "{sys}\conhost.exe"; \
+  Parameters: "--headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File ""{app}\lancer.ps1"""; \
   WorkingDir: "{app}"; IconFilename: "{code:StremioExe}"
 
 [Run]
-Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; \
-  Parameters: "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File ""{app}\lancer.ps1"""; \
+Filename: "{sys}\conhost.exe"; \
+  Parameters: "--headless powershell.exe -NoProfile -ExecutionPolicy Bypass -File ""{app}\lancer.ps1"""; \
   WorkingDir: "{app}"; Description: "Lancer Stremio Smart Filter maintenant"; Flags: postinstall nowait skipifsilent runhidden
 
 [UninstallRun]

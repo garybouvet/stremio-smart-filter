@@ -9,8 +9,8 @@ if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyCon
 $stremio = Find-Stremio
 if ($stremio -and -not $env:FFPROBE) { $env:FFPROBE = Join-Path (Split-Path $stremio) 'ffprobe.exe' }
 $python = Get-PythonCommand
-$arguments = @($python | Select-Object -Skip 1) + '-m', 'engine.server'
-$engine = Start-Process $python[0] -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -PassThru
+$command = (@("`"$($python[0])`"") + @($python | Select-Object -Skip 1) + '-m', 'engine.server') -join ' '
+$engine = Start-Invisible $command $root
 foreach ($i in 1..40) {
     if (Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) { break }
     Start-Sleep -Milliseconds 250

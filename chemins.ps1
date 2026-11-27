@@ -8,6 +8,12 @@ function Get-PythonCommand {
     return , @('uv', 'run', 'python')
 }
 
+# Lance une commande console sans aucune fenêtre : « -WindowStyle Hidden » montre quand même la console un instant,
+# et Windows Terminal (terminal par défaut de Windows 11) ne sait pas la cacher. conhost --headless n'en crée pas.
+function Start-Invisible([string]$CommandLine, [string]$WorkingDirectory = $PSScriptRoot) {
+    Start-Process "$env:SystemRoot\System32\conhost.exe" -ArgumentList "--headless $CommandLine" -WorkingDirectory $WorkingDirectory -WindowStyle Hidden -PassThru
+}
+
 # stremio-shell-ng.exe (Stremio 5) : dossier habituel, sinon celui que son installation a inscrit dans Windows.
 function Find-Stremio {
     $dirs = @("$env:LOCALAPPDATA\Programs\Stremio")

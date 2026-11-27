@@ -21,6 +21,6 @@ foreach ($name in $tasks.Keys) {
     if ($tasks[$name] | Where-Object { $busy.Contains("-m $_") }) { continue }
     $steps = ($tasks[$name] | ForEach-Object { "& $python -u -W ignore -m $_; if (`$LASTEXITCODE -ne 0) { exit 1 }" }) -join '; '
     $command = "Set-Location $(Quote $root); $steps; Set-Content $(Quote $done) (Get-Date -Format s)"
-    Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile', '-Command', $command
+    Start-Invisible "powershell.exe -NoProfile -Command `"$command`"" $root | Out-Null
     "relancé : $name"
 }
