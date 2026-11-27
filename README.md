@@ -25,7 +25,7 @@ Stremio Smart Filter s'ajoute à ton Stremio habituel : même compte, mêmes add
 
 **Partout :**
 - Recherche par titre français ou original, sans se soucier des accents (« les evades », « plan coeur »).
-- Aperçu en français : résumé, casting, bande-annonce en VF quand elle existe, notes et plateformes.
+- Aperçu dans la langue de ton Stremio : résumé, casting, notes, plateformes et bande-annonce, avec une pastille par langue disponible (FR, VOSTFR, EN…) à côté du bouton.
 
 **Sur la fiche d'un titre, le choix du lien :**
 - Menus **Audio** et **Sous-titres** séparés, plus **Qualité** et **Taille**.
