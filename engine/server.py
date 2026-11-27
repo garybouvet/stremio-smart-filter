@@ -130,7 +130,7 @@ class Handler(SimpleHTTPRequestHandler):
                         raise ValueError('type inconnu')
                     return self.reply(200, {'metas': search.by_ids(db, names.find(q.get('q', [''])[0][:100], typ))})
                 if u.path == '/api/preview':
-                    return self.reply(200, preview.preview(db, q.get('id', [''])[0], q.get('type', [''])[0]))
+                    return self.reply(200, preview.preview(db, q.get('id', [''])[0], q.get('type', [''])[0], q.get('lang', ['fr'])[0]))
                 f = search.parse(q)
                 if u.path == '/api/search':
                     return self.reply(200, self.page(db, f))

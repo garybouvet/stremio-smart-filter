@@ -204,6 +204,23 @@ class Preview(unittest.TestCase):
             self.assertEqual(trailer.choose([en, v('sanslang1', None)], 'fr'), ('sanslang1', 'fr'))
             self.assertEqual(trailer.choose([v('x"><script', 'fr'), clip]), (None, None))
 
+    def test_one_trailer_per_language_stremio_language_first(self):
+        v = lambda key, lang, name='Trailer': {'key': key, 'iso_639_1': lang, 'name': name, 'type': 'Trailer', 'site': 'YouTube'}
+        videos = [v('english01', 'en'), v('vostfr001', 'fr', 'Bande-annonce VOSTFR'), v('allemand1', 'de')]
+        with mock.patch.object(trailer, 'playable', lambda key: True):
+            self.assertEqual([(t['key'], t['label']) for t in trailer.choose_all(videos, 'en', ('en', 'en', 'fr'))],
+                             [('english01', 'EN'), ('vostfr001', 'VOSTFR')])
+            self.assertEqual([t['lang'] for t in trailer.choose_all(videos, 'en', ('de', 'en', 'fr'))], ['de', 'en', 'fr'])
+
+    def test_preview_follows_stremio_language(self):
+        body = {'overview': 'Summary', 'videos': {'results': [{'site': 'YouTube', 'type': 'Trailer', 'iso_639_1': 'en', 'key': 'ENGLISH1'},
+                                                             {'site': 'YouTube', 'type': 'Trailer', 'iso_639_1': 'fr', 'key': 'FRANCAIS'}]}}
+        with mock.patch.object(tmdb, 'get', return_value=body) as get, mock.patch.object(preview, 'setting', lambda *a: 'k'),                 mock.patch.object(trailer, 'playable', lambda key: True):
+            out = preview.preview(db(), 'tt1', 'movie', 'en')
+        self.assertEqual(get.call_args.kwargs['language'], 'en')
+        self.assertEqual((out['trailer'], [t['label'] for t in out['trailers']]), ('ENGLISH1', ['EN', 'FR']))
+        self.assertRaises(ValueError, preview.preview, db(), 'tt1', 'movie', 'english')
+
     def test_tmdb_down_or_bad_id(self):
         with mock.patch.object(tmdb, 'get', side_effect=OSError), mock.patch.object(preview, 'setting', lambda *a: 'k'):
             self.assertEqual(preview.preview(db(), 'tt1', 'movie'), {'ratings': {}, 'places': [], 'twin': None, 'names': ['Drame culte', 'Les Évadés']})
