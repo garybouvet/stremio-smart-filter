@@ -128,7 +128,10 @@ class Handler(SimpleHTTPRequestHandler):
                     typ = q.get('type', ['movie'])[0]
                     if typ not in ('movie', 'series'):
                         raise ValueError('type inconnu')
-                    return self.reply(200, {'metas': search.by_ids(db, names.find(q.get('q', [''])[0][:100], typ))})
+                    lang = q.get('lang', ['fr'])[0]
+                    if not re.fullmatch(r'[a-z]{2}', lang):
+                        raise ValueError('langue inconnue')
+                    return self.reply(200, {'metas': search.by_ids(db, names.find(q.get('q', [''])[0][:100], typ), lang)})
                 if u.path == '/api/preview':
                     return self.reply(200, preview.preview(db, q.get('id', [''])[0], q.get('type', [''])[0], q.get('lang', ['fr'])[0]))
                 f = search.parse(q)

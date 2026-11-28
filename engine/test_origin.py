@@ -91,5 +91,16 @@ class Wikidata(unittest.TestCase):
             self.assertEqual(wikidata.ask(['tt1', 'tt2']), [('tt1', ',GB,US,', 'en')])
 
 
+
+class TitleLanguage(unittest.TestCase):
+    def test_french_title_only_for_french_interface(self):
+        from .search import to_meta
+        row = ('tt1', 'movie', 'The Shawshank Redemption', 1994, 142, 0, 9.3, 3000000, 'Les Évadés', None)
+        self.assertEqual(to_meta(row)['name'], 'Les Évadés')
+        self.assertEqual(to_meta(row, 'en')['name'], 'The Shawshank Redemption')
+        self.assertEqual(to_meta(row[:8] + (None, None), 'fr')['name'], 'The Shawshank Redemption')
+        self.assertEqual(parse({'lang': ['en']})['lang'], 'en')
+        self.assertEqual(parse({'lang': ['<x>']})['lang'], 'fr')
+
 if __name__ == '__main__':
     unittest.main()

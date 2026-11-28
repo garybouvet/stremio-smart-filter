@@ -66,6 +66,7 @@ def parse(q):
     f['scores'] = {m[1]: float(one(k)) for k in q if (m := re.fullmatch(r'score_([a-z]+)_min', k)) and one(k)}
     f['skip'] = max(0, int(one('skip') or 0))
     f['limit'] = min(200, max(1, int(one('limit') or 50)))
+    f['lang'] = one('lang') if re.fullmatch(r'[a-z]{2}', one('lang') or '') else 'fr'
     return f
 
 
@@ -114,9 +115,11 @@ ALL_TITLES = (f'(SELECT {COLUMNS}, 100 AS floor FROM main.titles UNION ALL'
               f' SELECT {COLUMNS}, 10 FROM h.extra WHERE id NOT IN (SELECT old FROM h.merged)) AS titles')
 
 
-def to_meta(r):
+def to_meta(r, lang='fr'):
     tt, typ, name, year, runtime, genres, rating, votes, name_fr, poster = r
-    return {'id': tt.replace('tmdb:tv:', 'tmdb:'), 'type': typ, 'name': name_fr or name,  # Stremio distingue par le type
+    # Titre français si l'interface est en français ; sinon celui d'IMDb (le titre anglais ou original).
+    shown = (name_fr or name) if lang == 'fr' else name or name_fr
+    return {'id': tt.replace('tmdb:tv:', 'tmdb:'), 'type': typ, 'name': shown,  # Stremio distingue par le type
             'poster': poster or f'https://images.metahub.space/poster/small/{tt}/img',
             'releaseInfo': str(year or ''), 'year': year, 'runtime': f'{runtime} min' if runtime else None,
             'genres': genre_names(genres), 'imdbRating': None if rating is None else f'{rating:.1f}', 'votes': votes}
@@ -136,15 +139,15 @@ def page(db, f, counted=True):
     rows = db.execute(f'SELECT {SHOWN}, titles.total FROM ({inner}) AS titles {JOINS} ORDER BY {order}',
                       args + [f['limit'], f['skip']]).fetchall()
     found = rows[0][-1] if rows else (0 if f['skip'] == 0 else None)
-    return [to_meta(r[:-1]) for r in rows], found if counted else None
+    return [to_meta(r[:-1], f.get('lang', 'fr')) for r in rows], found if counted else None
 
 
-def by_ids(db, ids):
+def by_ids(db, ids, lang='fr'):
     """Titres dans l'ordre donné (résultats de recherche par nom)."""
     if not ids:
         return []
     rows = db.execute(f'SELECT {SHOWN} FROM {ALL_TITLES} {JOINS} WHERE titles.id IN ({",".join("?" * len(ids))})', ids).fetchall()
-    found = {r[0]: to_meta(r) for r in rows}
+    found = {r[0]: to_meta(r, lang) for r in rows}
     return [found[i] for i in ids if i in found]
 
 
@@ -167,7 +170,7 @@ def lookup(db, rows, f, ranked=False):
     if ranked:
         sql += f' ORDER BY {SORTS[f["sort"]]} LIMIT ? OFFSET ?'
         args = args + [f['limit'], f['skip']]
-    return {r[0]: to_meta(r) for r in db.execute(sql, args)}
+    return {r[0]: to_meta(r, f.get('lang', 'fr')) for r in db.execute(sql, args)}
 
 
 def options(db):
