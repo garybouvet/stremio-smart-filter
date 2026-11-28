@@ -24,7 +24,7 @@ Stremio Smart Filter s'ajoute à ton Stremio habituel : même compte, mêmes add
 ![Séries : triées par Rotten Tomatoes](docs/presentation/3-series.jpg)
 
 **Partout :**
-- Dans la langue de ton Stremio : français ou anglais pour les textes (l'anglais pour les autres langues), noms de pays et de langues dans toutes les langues, titres des films en français si Stremio est en français.
+- Dans la langue de ton Stremio : français, anglais, espagnol, portugais, allemand ou italien pour les textes (l'anglais pour les autres langues), noms de pays et de langues dans toutes les langues, titres des films en français si Stremio est en français.
 - Recherche par titre français ou original, sans se soucier des accents (« les evades », « plan coeur »).
 - Aperçu dans la langue de ton Stremio : résumé, casting, notes, plateformes et bande-annonce, avec une pastille par langue disponible (FR, VOSTFR, EN…) à côté du bouton.
 

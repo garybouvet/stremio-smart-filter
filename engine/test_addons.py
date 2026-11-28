@@ -72,6 +72,21 @@ class Filtres(unittest.TestCase):
         self.assertIn('Rotten Tomatoes', menus['Tri'])
         self.assertNotIn('Letterboxd', menus['Tri'])  # pas de notes Letterboxd dans ces données
 
+    def test_other_languages(self):
+        from .addon_texts import LANGS, NAMES
+        for lang in LANGS[1:]:  # chaque variante a tous ses noms (deploy/noms-addon.js à relancer sinon)
+            self.assertEqual(set(NAMES[lang]['genres']), set(addon_filtres.GENRES_FR.values()), lang)
+            self.assertEqual(set(NAMES[lang]['countries']), set(addon_filtres.COUNTRIES_FR), lang)
+            self.assertEqual(set(NAMES[lang]['languages']), set(addon_filtres.LANGS_FR), lang)
+        q = addon_filtres.to_query('movie', {'genre': 'Comedy', 'Rating': '8+', 'Not from': 'India', 'Votes': '10,000+',
+                                             'Decade': '1990s', 'Sort': 'Rotten Tomatoes'}, 'en')
+        self.assertEqual((q['genres_all'], q['rating_min'], q['country_not'], q['votes_min'], q['year_min'], q['sort'], q['lang']),
+                         (['Comedy'], ['8'], ['IN'], ['10000'], ['1990'], ['tomatoes'], ['en']))
+        m = addon_filtres.manifest({'languages': ['ko'], 'countries': ['DE'], 'places': [], 'scores': []}, 'de')
+        menus = {e['name']: e.get('options') for e in m['catalogs'][0]['extra']}
+        self.assertEqual((m['id'], m['name'], menus['Land'], menus['Sprache']), ('local.stremio-custom.filtres.de', 'Filter', ['Deutschland'], ['Koreanisch']))
+        self.assertIn('Komödie', menus['genre'])
+
     def test_unknown_option_is_rejected(self):
         self.assertRaises(ValueError, addon_filtres.catalog, None, 'movie', {'Note': '11+'})
 
